@@ -1,0 +1,12 @@
+app/log.txt
+
+videos/*.mp4
+videos/*.m4v
+videos/*.mov
+videos/*.wmv
+videos/*.avi
+videos/*.mkv
+videos/*.webm
+
+Thumbs.db
+desktop.ini
