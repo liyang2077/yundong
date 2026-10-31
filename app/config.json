@@ -1,18 +1,12 @@
-﻿{
-    "videoDir":  "videos",
-    "gapSeconds":  10,
-    "shuffle":  false,
-    "keepFocus":  true,
-    "emergencyHoldSeconds":  30,
-    "pauseLimitSeconds":  180,
-    "playlist":  [
-                     "肩颈操.mp4"
-                 ],
-    "schedule":  {
-                     "times":  [
-                                   "09:00",
-                                   "14:00",
-                                   "19:00"
-                               ]
-                 }
+{
+  "videoDir": "videos",
+  "gapSeconds": 10,
+  "shuffle": false,
+  "keepFocus": true,
+  "emergencyHoldSeconds": 60,
+  "pauseLimitSeconds": 300,
+  "playlist": [],
+  "schedule": {
+    "times": ["09:00", "12:00", "15:00", "18:00", "21:00"]
+  }
 }
