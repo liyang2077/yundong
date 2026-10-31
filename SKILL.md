@@ -1,5 +1,5 @@
 ---
-name: exercise-reminder
+name: yundong
 description: Windows 运动提醒工具，定时全屏弹出运动视频、不播完不能关。用于安装、配置、排错。触发词：运动提醒、久坐提醒、定时运动、弹出视频、exercise reminder、装个提醒我运动的工具。
 ---
 
@@ -23,43 +23,75 @@ description: Windows 运动提醒工具，定时全屏弹出运动视频、不�
 
 ### 步骤 1：确定安装目录
 
-询问用户装到哪，或者默认用 `D:\运动提醒`（D 盘不存在则用 `$env:USERPROFILE\运动提醒`）。
+**默认装到桌面**，用户装完一眼就能看到，不用满硬盘找。
 
-不要装到 `C:\Program Files`，那里需要管理员权限。
+```powershell
+$desktop = [Environment]::GetFolderPath('Desktop')
+$target  = Join-Path $desktop '运动提醒'
+```
+
+用 `[Environment]::GetFolderPath('Desktop')` 获取桌面路径，不要写死 `$env:USERPROFILE\Desktop` —— 桌面可能被 OneDrive 重定向到别处。
+
+用户明确指定别的目录就按他说的来。不要装到 `C:\Program Files`，那里需要管理员权限。
 
 ### 步骤 2：获取文件
+
+仓库地址：`https://github.com/liyang2077/yundong`
 
 优先用 git：
 
 ```powershell
-git clone <仓库地址> "D:\运动提醒"
+git clone https://github.com/liyang2077/yundong $target
 ```
 
-没有 git 就用下载：
+没装 git 就用下载：
 
 ```powershell
-$zip = "$env:TEMP\yd.zip"
-Invoke-WebRequest -Uri "<仓库地址>/archive/refs/heads/main.zip" -OutFile $zip
-Expand-Archive -Path $zip -DestinationPath "$env:TEMP\yd" -Force
-Move-Item "$env:TEMP\yd\*\*" "D:\运动提醒"
+$zip = Join-Path $env:TEMP 'yd.zip'
+Invoke-WebRequest -Uri "https://github.com/liyang2077/yundong/archive/refs/heads/main.zip" -OutFile $zip
+Expand-Archive -Path $zip -DestinationPath (Join-Path $env:TEMP 'yd') -Force
+New-Item -ItemType Directory $target -Force | Out-Null
+Get-ChildItem (Join-Path $env:TEMP 'yd') -Directory | ForEach-Object {
+    Move-Item (Join-Path $_.FullName '*') $target -Force
+}
+Remove-Item $zip, (Join-Path $env:TEMP 'yd') -Recurse -Force -ErrorAction SilentlyContinue
 ```
 
 ### 步骤 3：验证
 
-必须存在这两个文件，缺一就是没装对：
-
-```
-D:\运动提醒\开始运动.cmd
-D:\运动提醒\app\settings.ps1
+```powershell
+Test-Path (Join-Path $target '开始运动.cmd')      # 必须 True
+Test-Path (Join-Path $target 'app\settings.ps1')  # 必须 True
 ```
 
-### 步骤 4：启动
+两个都是 False 或其中一个 False，说明没装对，重来。
 
-告诉用户双击 `开始运动.cmd`，或者直接替他运行：
+### 步骤 4：启动并告知用户
 
 ```powershell
-Start-Process -FilePath "D:\运动提醒\开始运动.cmd"
+Start-Process (Join-Path $target '开始运动.cmd')
 ```
+
+然后**明确告诉用户装在哪了**，例如：
+
+> 已经装到你桌面的「运动提醒」文件夹里了。把运动视频（mp4）放进里面的 videos 文件夹，双击「开始运动.cmd」就能设置时间。
+
+补充提醒一句：桌面如果开了 OneDrive 备份，视频会同步占云空间，介意的话可以把 videos 文件夹里的大文件挪到别的盘（画面设置里的视频目录可以改）。
+
+---
+
+## 装成 Skill（可选）
+
+如果用户的 AI 支持 skill 机制（WorkBuddy 桌面版、Claude Code 等），可以把本仓库直接放进 skills 目录：
+
+```powershell
+git clone https://github.com/liyang2077/yundong "$env:USERPROFILE\.workbuddy\skills\yundong"
+```
+
+这样以后用户说「帮我设个每天 3 次的运动提醒」，AI 会自动加载本文件，直接改配置。
+
+
+注意：克隆到 skills 目录只是让 AI 能读到说明，**程序本身仍要双击 `开始运动.cmd` 才能运行**。
 
 ---
 
@@ -129,7 +161,11 @@ Start-Process -FilePath "D:\运动提醒\开始运动.cmd"
 "playlist": ["肩颈操.mp4"]
 ```
 
-**改完 config.json 之后，仍需让用户点一次「保存并应用定时」**，否则计划任务不会更新。
+**改完 config.json 之后，必须让用户重新打开一次设置界面，再点「保存并应用定时」。**
+
+原因：界面的输入框是打开那一刻从 config.json 读进去的。如果界面已经开着，点保存会用界面里的旧值把你的修改覆盖掉。
+
+正确顺序：先关掉界面 → 修改 config.json → 重新打开界面 → 点保存。
 
 ---
 

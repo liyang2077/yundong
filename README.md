@@ -47,7 +47,7 @@ Windows 桌面小工具，**零依赖** —— 不需要装 Python、Node.js 或
 > 帮我装 GitHub 上的 `liyang2077/yundong`，装到 D:\运动提醒，装完告诉我怎么用。
 
 仓库根目录有 `SKILL.md`，写明了安装和配置步骤，AI 读了就知道怎么做。
-也有 `install.ps1` 可以一条命令完成复制和注册。
+也有 `install.ps1` 可以一条命令完成安装（复制文件、建好目录）。
 
 前提是你的 AI 能执行本地命令（WorkBuddy 桌面版、Claude Code、Cursor 之类），网页版 AI 不行。
 
